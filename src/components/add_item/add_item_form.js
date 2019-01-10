@@ -1,29 +1,34 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+import { addNewItem } from '../../actions'
 
 
 class AddItemForm extends Component {
   renderInput(props){
-    // console.log("render input args", props)
     return(
       <div className={`col ${props.size || 's12'}`}>
         <div className="input-field">
           <input {...props.input} type="text" autoComplete="off"/>
-          <label>{props.label}</label>
+          <label htmlFor={props.id}>{props.label}</label>
         </div>
         <p className="red-text text-darken-2">{props.meta.touched && props.meta.error}</p>
       </div>
     )
   }
 
-  handleAddItem = (values) => {
-    // console.log('Add Item Form Values', values);
+  handleAddItem = async (values) => {
+    
+    await this.props.addNewItem(values);
+    
+    this.props.history.push('/');
 
-    this.props.reset();
+
+    // this.props.reset();
   }
 
   render(){
-    console.log("add Item form props", this.props)
     const { handleSubmit, reset } = this.props;
     return(
       <form onSubmit={handleSubmit(this.handleAddItem)}>
@@ -60,11 +65,21 @@ function validate(values){
   return errors;
 }
 
+function mapStateToProps(state, props){
+  return{
+    initialValues: {
+      title: "This is your default title",
+      details: 'Enter your details here'
+    }
+  }
+}
+
+AddItemForm = connect(mapStateToProps, {
+  addNewItem: addNewItem
+})(withRouter(AddItemForm));
+
 export default reduxForm({
   form: 'add-item-form',
   validate: validate,
-  initialValues: {
-    details: "This is your default title",
-    details: 'Enter your details here'
-  }
+
 })(AddItemForm)
